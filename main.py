@@ -9,15 +9,10 @@ import os.path
 import json
 import requests
 import random
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
-<<<<<<< HEAD
->>>>>>> FETCH_HEAD
 import tornado.escape
 from hashlib import sha512
-from passlib import pbkdf2_sha256
-
+from passlib.hash import pbkdf2_sha256
+import re
 #---------------------------------------------------------------------------
 
 from tornado.options import define, options, parse_command_line
@@ -57,25 +52,17 @@ class LoginHandler(BaseHandler):
 
         ## Password being encrypted with PKBDF2_SHA256 and a salt here and then being checked.
 
-        salted = '=ruQ3.Xc,G/*i|D[+!+$Mo^gn|kM1m|X[QxDOX-=zptIZhzn,};?-(Djsl,&Fg<r'
+        salted = b'=ruQ3.Xc,G/*i|D[+!+$Mo^gn|kM1m|X[QxDOX-=zptIZhzn,};?-(Djsl,&Fg<r'
         encryptedPassword = pbkdf2_sha256.encrypt(rawPassword, rounds=8000, salt= salted)
         
 
         #-----------------------------------------------------------
         # bkey encryption
-        concatenatedString = username+rawPassword+salted
+        concatenatedString = username+rawPassword+str(salted)
+        concatenatedString = concatenatedString.encode('utf-8')
         bkey = sha512(concatenatedString)
         bkey = bkey.hexdigest()
 
-
-
-        #-----------------------------------------------------------
-<<<<<<< HEAD
-        # get collection from DB 
-        ##
-=======
-        # get collection from DB
->>>>>>> FETCH_HEAD
         userCollectionFromDb = self.db.voters.find_one({"UserName":username})
         if userCollectionFromDb:
 
