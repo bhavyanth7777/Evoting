@@ -10,12 +10,13 @@ import json
 import requests
 import random
 import tornado.escape
-from passlib.hash import pbkdf2_sha256
+from hashlib import sha512
+from passlib import pbkdf2_sha256
 #---------------------------------------------------------------------------
 
 from tornado.options import define, options, parse_command_line
 define('port',default=8888,type=int)
-print("Hello")
+
 
 #---------------------------------------------------------------------------
 
@@ -51,19 +52,29 @@ class LoginHandler(BaseHandler):
         rawPassword = tornado.escape.xhtml_escape(self.get_argument("p"))
 
         ## Password being encrypted with PKBDF2_SHA256 and a salt here and then being checked.
+
         salted = '=ruQ3.Xc,G/*i|D[+!+$Mo^gn|kM1m|X[QxDOX-=zptIZhzn,};?-(Djsl,&Fg<r'
-        password = pbkdf2_sha256.encrypt(rawPassword, rounds=8000, salt= salted)
-        
-        
+        encryptedPassword = pbkdf2_sha256.encrypt(rawPassword, rounds=8000, salt= salted)
+        #-----------------------------------------------------------
+        # bkey encryption
+        concatenatedString = username+rawPassword+salted
+        bkey = sha512(concatenatedString)
+        bkey = bkey.hexdigest()
+
+
+
+        #-----------------------------------------------------------
+        # get collection from DB
         userCollectionFromDb = self.db.voters.find_one({"UserName":username})
 
         if userCollectionFromDb:
 
-            if password == userCollectionFromDb['Password']:
+            if encryptedPassword == userCollectionFromDb['Password']:
 
                 print(userCollectionFromDb['Name'])
-
+                # setting cookies when user logs in
                 self.set_secure_cookie("user", username)
+                self.set_secure_cookie("bkey",bkey)
                 self.render('index2.html')
             else:
 
