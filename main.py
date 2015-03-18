@@ -50,6 +50,9 @@ class LoginHandler(BaseHandler):
 
             self.set_secure_cookie("user", username)
             self.render('index2.html')
+        else: 
+            self.redirect('/')
+            self.write('enter the right password')
 
 class LogoutHandler(tornado.web.RequestHandler):
     def get(self):
