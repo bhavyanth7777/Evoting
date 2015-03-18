@@ -10,6 +10,7 @@ import json
 import requests
 import random
 import tornado.escape
+from passlib.hash import pbkdf2_sha256
 #---------------------------------------------------------------------------
 
 from tornado.options import define, options, parse_command_line
@@ -46,7 +47,12 @@ class LoginHandler(BaseHandler):
     def post(self):
         self.db = db
         username = tornado.escape.xhtml_escape(self.get_argument("u"))
-        password = tornado.escape.xhtml_escape(self.get_argument("p"))
+        rawPassword = tornado.escape.xhtml_escape(self.get_argument("p"))
+
+        ## Password being encrypted with PKBDF2_SHA256 and a salt here and then being checked.
+        salted = '=ruQ3.Xc,G/*i|D[+!+$Mo^gn|kM1m|X[QxDOX-=zptIZhzn,};?-(Djsl,&Fg<r'
+        password = pbkdf2_sha256.encrypt(rawPassword, rounds=8000, salt= salted)
+        
         
         userCollectionFromDb = self.db.voters.find_one({"UserName":username})
 
