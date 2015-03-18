@@ -19,3 +19,13 @@ for i in range(3):
 	voter = {"Name":name[i],"UserName":username[i],"Password":password[i],"EncryptedBallotId":encrpytedBallotId,"Region":region[i]}
 	db.voters.insert(voter)
 
+
+ContestantName = ['Pratham', 'Utkarsh', 'Amriteya', 'Aditya', 'Aman']
+IDs = [1,2,3,4,5]
+Position = ['President', 'President', 'President', 'Vice President', 'Vice President']
+Region = [0,0,0,0,0]
+
+for i in range(3):
+	election = {"Name":ContestantName[i],"ID":IDs[i],"Position":Position[i],"Region":Region[i]}
+	db.candidates.insert(election)
+
