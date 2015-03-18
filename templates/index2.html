@@ -19,7 +19,7 @@
 </head>
 
 <body>
-        
+     
     <script type="text/javascript">
 $(document).ready(function(){
 
@@ -138,31 +138,15 @@ $(document).ready(function(){
         </li>
         <p style="margin-left:5%;"><font size=4>Choose Your Candidates</font></p>
         <li class="divider"></li>
-        
+        {% for i in range(len(positions))%}
         <li>
-            <a href="#" id="link_1">
+            <a href="#" id="link_{{i+1}}">
                 <!--i class="sidebar-icon md-inbox"></i-->
-                Elect President
+                Elect {{positions[i]}}
             </a>
         </li>
-        <li>
-            <a href="#" id="link_2">
-                <!--i class="sidebar-icon md-star"></i-->
-                Elect Vice President
-            </a>
-        </li>
-        <li>
-            <a href="#" id="link_3">
-                <!--i class="sidebar-icon md-send"></i-->
-                Elect Technical Director
-            </a>
-        </li>
-        <li>
-            <a href="#" id="link_4">
-                <!--i class="sidebar-icon md-drafts"></i-->
-                Elect Assistant Director
-            </a>
-        </li>
+        {% end %}
+        
         <li class="divider"></li>
         <li>
             <a href="#" id="link_5">

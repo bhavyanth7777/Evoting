@@ -72,7 +72,12 @@ class LoginHandler(BaseHandler):
                 # setting cookies when user logs in
                 self.set_secure_cookie("user", username)
                 self.set_secure_cookie("bkey",bkey)
-                self.render('index2.html')
+                regionId = userCollectionFromDb['Region']
+                print(regionId)
+                regionDoc = self.db.regions.find_one({"RegionId":regionId})
+                print(regionDoc)
+                positions = regionDoc['Positions']
+                self.render('index2.html',positions=positions)
             else:
 
                 self.redirect('/')
