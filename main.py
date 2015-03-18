@@ -16,9 +16,9 @@ define('port',default=8888,type=int)
 
 #---------------------------------------------------------------------------
 
-# from pymongo import MongoClient
-# client = MongoClient()
-# db = client['Evoting']
+from pymongo import MongoClient
+client = MongoClient()
+db = client['Evoting']
 
 
 #-------------------------------------------------------
