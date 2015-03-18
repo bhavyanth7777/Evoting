@@ -9,24 +9,23 @@ import os.path
 import json
 import requests
 import random
+<<<<<<< HEAD
 import tornado.escape
 from hashlib import sha512
 from passlib import pbkdf2_sha256
 #---------------------------------------------------------------------------
 
+#---------------------------------------------------------------------------
 from tornado.options import define, options, parse_command_line
 define('port',default=8888,type=int)
 
 
 #---------------------------------------------------------------------------
-
 from pymongo import MongoClient
 client = MongoClient()
 db = client['Evoting']
 
-
 #-------------------------------------------------------
-
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
         self.render('index.html')
@@ -48,8 +47,8 @@ class LoginHandler(BaseHandler):
 
     def post(self):
         self.db = db
-        username = tornado.escape.xhtml_escape(self.get_argument("u"))
-        rawPassword = tornado.escape.xhtml_escape(self.get_argument("p"))
+        username = re.escape(self.get_argument("u"))
+        rawPassword = re.escape(self.get_argument("p"))
 
         ## Password being encrypted with PKBDF2_SHA256 and a salt here and then being checked.
 
@@ -65,8 +64,10 @@ class LoginHandler(BaseHandler):
 
         #-----------------------------------------------------------
         # get collection from DB
+        password = pbkdf2_sha256.encrypt(rawPassword, rounds=8000, salt= salted)
+        
+        ##
         userCollectionFromDb = self.db.voters.find_one({"UserName":username})
-
         if userCollectionFromDb:
 
             if encryptedPassword == userCollectionFromDb['Password']:
