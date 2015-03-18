@@ -9,17 +9,23 @@ import os.path
 import json
 import requests
 import random
+<<<<<<< HEAD
+=======
+<<<<<<< Updated upstream
+<<<<<<< HEAD
+>>>>>>> FETCH_HEAD
 import tornado.escape
 from hashlib import sha512
 from passlib import pbkdf2_sha256
-#---------------------------------------------------------------------------
 
 #---------------------------------------------------------------------------
+
 from tornado.options import define, options, parse_command_line
 define('port',default=8888,type=int)
 
 
 #---------------------------------------------------------------------------
+
 from pymongo import MongoClient
 client = MongoClient()
 db = client['Evoting']
@@ -53,6 +59,8 @@ class LoginHandler(BaseHandler):
 
         salted = '=ruQ3.Xc,G/*i|D[+!+$Mo^gn|kM1m|X[QxDOX-=zptIZhzn,};?-(Djsl,&Fg<r'
         encryptedPassword = pbkdf2_sha256.encrypt(rawPassword, rounds=8000, salt= salted)
+        
+
         #-----------------------------------------------------------
         # bkey encryption
         concatenatedString = username+rawPassword+salted
@@ -62,8 +70,12 @@ class LoginHandler(BaseHandler):
 
 
         #-----------------------------------------------------------
+<<<<<<< HEAD
         # get collection from DB 
         ##
+=======
+        # get collection from DB
+>>>>>>> FETCH_HEAD
         userCollectionFromDb = self.db.voters.find_one({"UserName":username})
         if userCollectionFromDb:
 
