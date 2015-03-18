@@ -52,7 +52,7 @@ class LoginHandler(BaseHandler):
             self.render('index2.html')
         else: 
             self.redirect('/')
-            self.write('enter the right password')
+            
 
 class LogoutHandler(tornado.web.RequestHandler):
     def get(self):
