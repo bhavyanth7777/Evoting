@@ -15,6 +15,7 @@ from passlib.hash import pbkdf2_sha256
 
 from tornado.options import define, options, parse_command_line
 define('port',default=8888,type=int)
+print("Hello")
 
 #---------------------------------------------------------------------------
 
