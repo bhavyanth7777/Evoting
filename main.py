@@ -10,6 +10,7 @@ import json
 import requests
 import random
 from passlib.hash import pbkdf2_sha256
+import re
 
 #---------------------------------------------------------------------------
 from tornado.options import define, options, parse_command_line
