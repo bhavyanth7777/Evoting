@@ -9,7 +9,6 @@ import os.path
 import json
 import requests
 import random
-<<<<<<< HEAD
 import tornado.escape
 from hashlib import sha512
 from passlib import pbkdf2_sha256
@@ -63,9 +62,7 @@ class LoginHandler(BaseHandler):
 
 
         #-----------------------------------------------------------
-        # get collection from DB
-        password = pbkdf2_sha256.encrypt(rawPassword, rounds=8000, salt= salted)
-        
+        # get collection from DB 
         ##
         userCollectionFromDb = self.db.voters.find_one({"UserName":username})
         if userCollectionFromDb:
