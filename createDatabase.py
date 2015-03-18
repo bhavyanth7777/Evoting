@@ -18,5 +18,3 @@ for i in range(3):
 
 	voter = {"Name":name[i],"UserName":username[i],"Password":password[i],"EncryptedBallotId":encrpytedBallotId,"Region":region[i]}
 	db.voters.insert(voter)
-
-print db.voters.find_one()
