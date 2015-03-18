@@ -9,6 +9,7 @@ import os.path
 import json
 import requests
 import random
+import tornado.escape
 #---------------------------------------------------------------------------
 
 from tornado.options import define, options, parse_command_line
@@ -43,15 +44,29 @@ class LoginHandler(BaseHandler):
         self.redirect('/')
 
     def post(self):
-        username = self.get_argument("u")
-        password = self.get_argument("p")
+        self.db = db
+        username = tornado.escape.xhtml_escape(self.get_argument("u"))
+        password = tornado.escape.xhtml_escape(self.get_argument("p"))
+        
+        userCollectionFromDb = self.db.voters.find_one({"UserName":username})
 
-        if password == 'kolli':
+        if userCollectionFromDb:
 
-            self.set_secure_cookie("user", username)
-            self.render('index2.html')
-        else: 
+            if password == userCollectionFromDb['Password']:
+
+                print(userCollectionFromDb['Name'])
+
+                self.set_secure_cookie("user", username)
+                self.render('index2.html')
+            else:
+
+                self.redirect('/')
+        else:
             self.redirect('/')
+
+
+
+        
             
 
 class LogoutHandler(tornado.web.RequestHandler):

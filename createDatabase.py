@@ -11,6 +11,6 @@ encrpytedBallotId = ''
 region = ['4','5','6']
 
 
-for i in xrange(3):
+for i in range(3):
 	voter = {"Name":name[i],"UserName":username[i],"Password":password[i],"EncryptedBallotId":encrpytedBallotId,"Region":region[i]}
 	db.voters.insert(voter)
