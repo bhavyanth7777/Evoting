@@ -16,7 +16,7 @@ import re
 #---------------------------------------------------------------------------
 
 from tornado.options import define, options, parse_command_line
-define('port',default=8888,type=int)
+#define('port',address='0.0.0.0',default=8888,type=int)
 
 
 #---------------------------------------------------------------------------
@@ -77,7 +77,17 @@ class LoginHandler(BaseHandler):
                 regionDoc = self.db.regions.find_one({"RegionId":regionId})
                 print(regionDoc)
                 positions = regionDoc['Positions']
-                self.render('index2.html',positions=positions)
+                
+                #------- IP RETRIEVAL-------------
+                httpHeaders = repr(self.request)
+                httpHeaders = httpHeaders.split(', ')
+                ip = httpHeaders[5]
+                ip = ip.split('=')
+                ip = ip[1].strip('"\'')
+                #----------------------------------
+                self.render('index2.html',positions=positions,ip=ip)
+
+
             else:
 
                 self.redirect('/')
@@ -133,5 +143,5 @@ if __name__ == "__main__":
     app = tornado.web.Application(handlers, template_path=os.path.join(os.path.dirname(__file__), "templates"),
                                   static_path=os.path.join(os.path.dirname(__file__), "static"), cookie_secret="61oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=", debug=True)
     http_server = tornado.httpserver.HTTPServer(app)
-    http_server.listen(options.port)
+    http_server.listen(8888, address='0.0.0.0')
     tornado.ioloop.IOLoop.instance().start()
