@@ -13,6 +13,7 @@ import tornado.escape
 from hashlib import sha512
 from passlib.hash import pbkdf2_sha256
 import re
+import datetime
 #---------------------------------------------------------------------------
 
 from tornado.options import define, options, parse_command_line
@@ -77,13 +78,16 @@ class LoginHandler(BaseHandler):
                 regionDoc = self.db.regions.find_one({"RegionId":regionId})
                 print(regionDoc)
                 positions = regionDoc['Positions']
-                
+
                 #------- IP RETRIEVAL-------------
                 httpHeaders = repr(self.request)
                 httpHeaders = httpHeaders.split(', ')
                 ip = httpHeaders[5]
                 ip = ip.split('=')
                 ip = ip[1].strip('"\'')
+                # ips collection, where all the ip requests along with time are logged
+                ipDocument = {'Username':username, 'IP':ip, 'Time':repr(datetime.datetime.now())}
+                db.ips.insert(ipDocument)
                 #----------------------------------
                 self.render('index2.html',positions=positions,ip=ip)
 
