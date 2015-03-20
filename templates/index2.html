@@ -21,6 +21,7 @@
 <body>
      
     <script type="text/javascript">
+    
 $(document).ready(function(){
 
   // Hide div 1,2,3 by default
@@ -30,7 +31,6 @@ $(document).ready(function(){
     $('#ev-wrapper4').hide();
 
   {% for i in range(1,len(positions)+1) %}
-  
   $('#link_{{i}}').click(function(){
     {% for x in range(len(positions)) %} 
         $('#ev-wrapper{{x}}').hide();
@@ -112,7 +112,7 @@ $(document).ready(function(){
         <li>
             <a href="#" id="link_{{i+1}}">
                 <!--i class="sidebar-icon md-inbox"></i-->
-                Elect {{positions[i]}}
+                 {{positions[i]}}
             </a>
         </li>
         {% end %}
@@ -150,7 +150,7 @@ $(document).ready(function(){
           <div class="ev-wrapper" id="ev-wrapper{{i}}">
         <div class="ev-header">
           <small>February 21, 2015 &mdash; February 25, 2015</small>
-          <h2 class="ev-headline">Elect {{positions[i]}}</h2>
+          <h2 class="ev-headline">{{positions[i]}} Nominations</h2>
         </div>
         <ul class="ev-user">
           <li class="ev-user-1 finalist-1">

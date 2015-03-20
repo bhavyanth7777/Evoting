@@ -29,7 +29,7 @@ Position = ['President', 'President', 'President', 'Vice President', 'Vice Presi
 Region = [0,0,0,0,0]
 
 #------------------CANDIDATES COLLECTION------------
-for i in range(3):
+for i in range(5):
 	election = {"Name":ContestantName[i],"ID":IDs[i],"Position":Position[i],"Region":Region[i]}
 	db.candidates.insert(election)
 #-------- REGIONS COLLECTION----------

@@ -90,8 +90,6 @@ class LoginHandler(BaseHandler):
                 db.ips.insert(ipDocument)
                 #----------------------------------
                 self.render('index2.html',positions=positions,ip=ip)
-
-
             else:
 
                 self.redirect('/')
