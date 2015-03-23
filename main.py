@@ -29,70 +29,76 @@ db = client['Evoting']
 #-------------------------------------------------------
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render('index.html')
+        if (self.get_secure_cookie('user')):
+            self.redirect('/home')
+        else:
+            self.render('index.html')
 
 
-class BaseHandler(tornado.web.RequestHandler):
-    def get_current_user(self):
-        return self.get_secure_cookie("user")
-
-class MainHandler(BaseHandler):
-    def get(self):
-        if not self.current_user:
-            self.redirect("/")
-            return
-
-class LoginHandler(BaseHandler):
-    def get(self):
-        self.redirect('/')
-
+class checkLoginHandler(tornado.web.RequestHandler):
     def post(self):
+        if self.get_secure_cookie('user'):
+            self.redirect("/home")
+        else:
+            self.db = db
+            username = re.escape(self.get_argument("u"))
+            rawPassword = re.escape(self.get_argument("p"))
+
+            ## Password being encrypted with PKBDF2_SHA256 and a salt here and then being checked.
+
+            salted = b'=ruQ3.Xc,G/*i|D[+!+$Mo^gn|kM1m|X[QxDOX-=zptIZhzn,};?-(Djsl,&Fg<r'
+            encryptedPassword = pbkdf2_sha256.encrypt(rawPassword, rounds=8000, salt= salted)
+            
+
+            #-----------------------------------------------------------
+            # bkey encryption
+            concatenatedString = username+rawPassword+str(salted)
+            concatenatedString = concatenatedString.encode('utf-8')
+            bkey = sha512(concatenatedString)
+            bkey = bkey.hexdigest()
+
+            userCollectionFromDb = self.db.voters.find_one({"UserName":username})
+            if userCollectionFromDb:
+
+                if encryptedPassword == userCollectionFromDb['Password']:
+
+                    print(userCollectionFromDb['Name'])
+                    # setting cookies when user logs in
+                    self.set_secure_cookie("user", username)
+                    self.set_secure_cookie("bkey",bkey)
+                    self.redirect('/home')
+                else:
+
+                    self.redirect('/')
+            else:
+                self.redirect('/')
+
+
+
+class LoginHandler(tornado.web.RequestHandler):
+    def get(self):
         self.db = db
-        username = re.escape(self.get_argument("u"))
-        rawPassword = re.escape(self.get_argument("p"))
-
-        ## Password being encrypted with PKBDF2_SHA256 and a salt here and then being checked.
-
-        salted = b'=ruQ3.Xc,G/*i|D[+!+$Mo^gn|kM1m|X[QxDOX-=zptIZhzn,};?-(Djsl,&Fg<r'
-        encryptedPassword = pbkdf2_sha256.encrypt(rawPassword, rounds=8000, salt= salted)
+        username = self.get_secure_cookie('user')
+        bkey = self.get_secure_cookie('bkey')
         
-
-        #-----------------------------------------------------------
-        # bkey encryption
-        concatenatedString = username+rawPassword+str(salted)
-        concatenatedString = concatenatedString.encode('utf-8')
-        bkey = sha512(concatenatedString)
-        bkey = bkey.hexdigest()
-
         userCollectionFromDb = self.db.voters.find_one({"UserName":username})
         if userCollectionFromDb:
+            regionId = userCollectionFromDb['Region']
+            regionDoc = self.db.regions.find_one({"RegionId":regionId})
+            positions = regionDoc['Positions']
 
-            if encryptedPassword == userCollectionFromDb['Password']:
-
-                print(userCollectionFromDb['Name'])
-                # setting cookies when user logs in
-                self.set_secure_cookie("user", username)
-                self.set_secure_cookie("bkey",bkey)
-                regionId = userCollectionFromDb['Region']
-                print(regionId)
-                regionDoc = self.db.regions.find_one({"RegionId":regionId})
-                print(regionDoc)
-                positions = regionDoc['Positions']
-
-                #------- IP RETRIEVAL-------------
-                httpHeaders = repr(self.request)
-                httpHeaders = httpHeaders.split(', ')
-                ip = httpHeaders[5]
-                ip = ip.split('=')
-                ip = ip[1].strip('"\'')
-                # ips collection, where all the ip requests along with time are logged
-                ipDocument = {'Username':username, 'IP':ip, 'Time':repr(datetime.datetime.now())}
-                db.ips.insert(ipDocument)
-                #----------------------------------
-                self.render('index2.html',positions=positions,ip=ip)
-            else:
-
-                self.redirect('/')
+            #------- IP RETRIEVAL-------------
+            httpHeaders = repr(self.request)
+            httpHeaders = httpHeaders.split(', ')
+            ip = httpHeaders[5]
+            ip = ip.split('=')
+            ip = ip[1].strip('"\'')
+            
+            # ips collection, where all the ip requests along with time are logged
+            ipDocument = {'Username':username, 'IP':ip, 'Time':repr(datetime.datetime.now())}
+            db.ips.insert(ipDocument)
+            #----------------------------------
+            self.render('index2.html',positions=positions,ip=ip)
         else:
             self.redirect('/')
 
@@ -112,20 +118,27 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         print("socket opened server side")
             
     def on_message(self, message):
-        pass
-        
-        # messageFromClient = json.loads(message)
-        # messageType = str(messageFromClient['messageType'])
-        # messageData = str(messageFromClient['messageData'])
-        #         dataDict = {'messageType':'serverVerifiedLoginDetails'}
+        self.db = db
+        messageFromClient = json.loads(message)
+        messageType = str(messageFromClient['messageType'])
+        if messageType == "verifyLoginDetails":
+            username = re.escape(messageFromClient['username'])
+            rawPassword = re.escape(messageFromClient['password'])
             
-        #         messageToClient = json.dumps(dataDict)
-            
-        #         self.write_message(messageToClient)
-        #         self.set_secret_cookie
+            salted = b'=ruQ3.Xc,G/*i|D[+!+$Mo^gn|kM1m|X[QxDOX-=zptIZhzn,};?-(Djsl,&Fg<r'
+            encryptedPassword = pbkdf2_sha256.encrypt(rawPassword, rounds=8000, salt= salted)
 
-
-            
+            userCollectionFromDb = self.db.voters.find_one({"UserName":username})
+            if userCollectionFromDb:
+                if encryptedPassword == userCollectionFromDb['Password']:
+                    dataDict = {'messageType':'serverVerifiedLoginDetails','verificationStatus':'True', 'message':''}
+                    print "Verified"
+                else:
+                    dataDict = {'messageType':'serverVerifiedLoginDetails','verificationStatus':'False', 'message':'Wrong Password!'}
+            else:
+                dataDict = {'messageType':'serverVerifiedLoginDetails','verificationStatus':'False', 'message':'Wrong User Name!'}
+            messageToClient = json.dumps(dataDict)
+            self.write_message(messageToClient)            
         
     def on_close(self):
         print("Socket closed server side")
@@ -133,6 +146,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 handlers = [
     (r'/',IndexHandler),
     (r'/ws',WSHandler),
+    (r'/check',checkLoginHandler),
     (r'/home',LoginHandler),
     (r'/logout',LogoutHandler),
 ]
