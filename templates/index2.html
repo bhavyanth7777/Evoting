@@ -17,34 +17,33 @@
     <script src="static/js/vui.js"></script>
     
 </head>
-
+<!--
+  All the link/overlays/content start from 1. 
+  By default 1 is visible and the rest are hidden. 
+-->
 <body>
      
-    <script type="text/javascript">
+  <script type="text/javascript">
     // We add +2 because review section also comes after all positions. 
-$(document).ready(function(){
+  $(document).ready(function()
+  {
+      {% for i in range(2,len(positions)+2) %}
+          $('#ev-wrapper{{i}}').hide();
+      {% end %}
 
-  {% for i in range(2,len(positions)+2) %}
-      $('#ev-wrapper{{i}}').hide();
-  {% end %}
-
-  {% for i in range(1,len(positions)+2) %}
-    
-    $('#link_{{i}}').click(function()
-    {
-      {% for x in range(1,len(positions)+2) %} 
-        $('#ev-wrapper{{x}}').hide();
+      {% for i in range(1,len(positions)+2) %}
+          $('#link_{{i}}').click(function()
+           {
+              {% for x in range(1,len(positions)+2) %} 
+                  $('#ev-wrapper{{x}}').hide();
+              {%end%}
+              $('#ev-wrapper{{i}}').show();
+            }
+          );
       {%end%}
-      $('#ev-wrapper{{i}}').show();
-    }
-    );
-    
-    {%end%}
-
 });
-    </script>
-    
-    
+  </script>
+      
 <!--   Overlay for fixed sidebar -->
 <div class="sidebar-overlay"></div>
 
@@ -75,6 +74,8 @@ $(document).ready(function(){
         </li>
         <p style="margin-left:5%;"><font size=4>Choose Your Candidates</font></p>
         <li class="divider"></li>
+        
+        <!-- To print all the positions on the sidebar -->
         {% for i in range(len(positions))%}
         <li>
             <a href="#" id="link_{{i+1}}">
@@ -97,8 +98,8 @@ $(document).ready(function(){
     
     <div id="fontlinks">
         <p>You logged in from: {{ip}}</p>
-		<a href="#" id="incfont" class="button buttonfont">A+</a>
-		<a href="#" id="decfont" class="button buttonfont">A-</a>
+    		<a href="#" id="incfont" class="button buttonfont">A+</a>
+    		<a href="#" id="decfont" class="button buttonfont">A-</a>
     </div>
     
     <img src="static/img/logo.png" width="100" height="100" style="margin-left: 5%; margin-top: 10%;">
@@ -111,56 +112,53 @@ $(document).ready(function(){
 </aside>
 
 <div class="wrapper" id="content">
-    
-    <!--PRESIDENT-->
-      {% for i in range(len(candidatesList)) %}
-        <div class="ev-wrapper" id="ev-wrapper{{i+1}}">
+    <!--For all the different positions.-->
+    {% for i in range(len(candidatesList)) %}
+      <div class="ev-wrapper" id="ev-wrapper{{i+1}}">
         <div class="ev-header">
           <small>February 21, 2015 &mdash; February 25, 2015</small>
           <h2 class="ev-headline">{{positions[i]}} Nominations</h2>
         </div>
-        
+      
         <ul class="ev-user">
+            <!-- For all the different candidates in each position -->
             {% for s in range(len(candidatesList[i])) %}
-            <li class="ev-user-{{s+1}} finalist-{{s+1}}">
-            <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
-            
-            <h3>{{candidatesList[i][s]}}</h3>
-            <p>CSI, Punjab</p>
-            <a href="#" class="ev-voting-launch ev-btn" rel="finalist-{{s+1}}">
-              <span class="text">Select & Save</span>
-              <span class="overlay"></span>
-            </a>
-          </li>
+              <li class="ev-user-{{s+1}} finalist-{{s+1}}">
+                <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
+              
+                <h3>{{candidatesList[i][s]}}</h3>
+                <p>CSI, Punjab</p>
+                <a href="#" class="ev-voting-launch ev-btn" rel="finalist-{{s+1}}">
+                  <span class="text">Select & Save</span>
+                  <span class="overlay"></span>
+                </a>
+              </li>
             {% end %}
         </ul>
 
         <ul class="ev-content">
           {% for n in range(1,len(candidatesList[i])+1) %}
-          <li class="ev-content-{{n}} finalist-{{n}}">
-            <div class="ev-content-body">
-              <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>            
-              <h3>{{candidatesList[i][n-1]}}</h3>
-              <p>CSI, Punjab</p>
-              <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</p>
-              <div class="ev-video">
-                <p><a href="#" class="ev-voting-launch ev-btn" rel="finalist-{{n}}">Select & Save Candidate</a></p>
+            <li class="ev-content-{{n}} finalist-{{n}}">
+              <div class="ev-content-body">
+                <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>            
+                <h3>{{candidatesList[i][n-1]}}</h3>
+                <p>CSI, Punjab</p>
+                <p>{{ description[i][n-1]}}</p>
+                <div class="ev-video">
+                  <p><a href="#" class="ev-voting-launch ev-btn" rel="finalist-{{n}}">Select & Save Candidate</a></p>
+                </div>
               </div>
-            </div>
-
-            <div class="ev-overlay ev-overlay-{{n}}">
-              <div class="ev-overlay-content">
-                <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
-                <h3>Select <span>Candidate</span></h3>
-                <a href="#" class="ev-vote ev-vote-finalist-{{n}} ev-btn">Yes!</a> <a href="#" class="ev-vote-cancel ev-btn">Cancel</a>
+              <div class="ev-overlay ev-overlay-{{n}}">
+                <div class="ev-overlay-content">
+                  <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
+                  <h3>Select <span>Candidate</span></h3>
+                  <a href="#" class="ev-vote ev-vote-finalist-{{n}} ev-btn">Yes!</a> <a href="#" class="ev-vote-cancel ev-btn">Cancel</a>
+                </div>
               </div>
-            </div>
-          </li>
+            </li>
           {% end %}
         </ul>
-      
       </div>
-      
     {% end %}
     
     <!--REVIEW SECTION-->
