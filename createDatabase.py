@@ -23,15 +23,16 @@ for i in range(3):
 	db.voters.insert(voter)
 
 # Candidates
-ContestantName = ['Pratham', 'Utkarsh', 'Amriteya', 'Aditya', 'Aman']
-IDs = [1,2,3,4,5]
-Position = ['President', 'President', 'President', 'Vice President', 'Vice President']
-Region = [0,0,0,0,0]
+ContestantName = ['Pratham', 'Utkarsh', 'Amriteya', 'Aditya', 'Aman', 'Bhavyanth', 'Abhilash','Sonam','Sudhanshu']
+IDs = [1,2,3,4,5,6,7,8,9]
+Position = ['President', 'President', 'President', 'Vice President', 'Vice President', 'President', 'Secretary','Secretary','Vice President']
+Region = [0,0,0,0,0,0,0,0,0]
 
 #------------------CANDIDATES COLLECTION------------
-for i in range(5):
+for i in range(9):
 	election = {"Name":ContestantName[i],"ID":IDs[i],"Position":Position[i],"Region":Region[i]}
 	db.candidates.insert(election)
+
 #-------- REGIONS COLLECTION----------
 region = {'RegionId':'0', 'Positions':['President','Vice President','Secretary']}
 db.regions.insert(region)

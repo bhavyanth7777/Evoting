@@ -21,23 +21,25 @@
 <body>
      
     <script type="text/javascript">
-    
+    // We add +2 because review section also comes after all positions. 
 $(document).ready(function(){
 
-  // Hide div 1,2,3 by default
-    $('#ev-wrapper1').hide();
-    $('#ev-wrapper2').hide();
-    $('#ev-wrapper3').hide();
-    $('#ev-wrapper4').hide();
+  {% for i in range(2,len(positions)+2) %}
+      $('#ev-wrapper{{i}}').hide();
+  {% end %}
 
-  {% for i in range(1,len(positions)+1) %}
-  $('#link_{{i}}').click(function(){
-    {% for x in range(len(positions)) %} 
+  {% for i in range(1,len(positions)+2) %}
+    
+    $('#link_{{i}}').click(function()
+    {
+      {% for x in range(1,len(positions)+2) %} 
         $('#ev-wrapper{{x}}').hide();
+      {%end%}
+      $('#ev-wrapper{{i}}').show();
+    }
+    );
+    
     {%end%}
-    $('#ev-wrapper{{i-1}}').show();
-  });
-  {%end%}
 
 });
     </script>
@@ -48,45 +50,10 @@ $(document).ready(function(){
 
 <!-- Material sidebar -->
 <aside id="sidebar" class="sidebar sidebar-default open" role="navigation">
-    <!-- Sidebar header -->
-    
-    <!--div class="sidebar-header header-cover">
-        
-        // Sidebar brand name
-        <a data-toggle="dropdown" class="sidebar-brand" href="#settings-dropdown">
-            Aman Sardana
-            <b class="caret"></b>
-        </a>
-    </div>
-    
-    -->
+   
 <div>
     <!-- Sidebar navigation -->
     <ul class="nav sidebar-nav">
-        <!--li class="dropdown">
-            <ul id="settings-dropdown" class="dropdown-menu">
-                <li>
-                    <a href="#" tabindex="-1">
-                        Profile
-                    </a>
-                </li>
-                <li>
-                    <a href="#" tabindex="-1">
-                        Settings
-                    </a>
-                </li>
-                <li>
-                    <a href="#" tabindex="-1">
-                        Help
-                    </a>
-                </li>
-                <li>
-                    <a href="index.html" tabindex="-1">
-                        Logout
-                    </a>
-                </li>
-            </ul>
-        </li-->
         
         <li>
             <a href="#">
@@ -119,7 +86,7 @@ $(document).ready(function(){
         
         <li class="divider"></li>
         <li>
-            <a href="#" id="link_5">
+            <a href="#" id="link_{{len(positions)+1}}">
                 <!--i class="sidebar-icon md-drafts"></i-->
                 Review Candidates & Submit
             </a>
@@ -146,138 +113,58 @@ $(document).ready(function(){
 <div class="wrapper" id="content">
     
     <!--PRESIDENT-->
-      {% for i in range(len(positions)) %}
-          <div class="ev-wrapper" id="ev-wrapper{{i}}">
+      {% for i in range(len(candidatesList)) %}
+        <div class="ev-wrapper" id="ev-wrapper{{i+1}}">
         <div class="ev-header">
           <small>February 21, 2015 &mdash; February 25, 2015</small>
           <h2 class="ev-headline">{{positions[i]}} Nominations</h2>
         </div>
+        
         <ul class="ev-user">
-          <li class="ev-user-1 finalist-1">
+            {% for s in range(len(candidatesList[i])) %}
+            <li class="ev-user-{{s+1}} finalist-{{s+1}}">
             <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
-            <h3>Candidate A</h3>
+            
+            <h3>{{candidatesList[i][s]}}</h3>
             <p>CSI, Punjab</p>
-            <a href="#" class="ev-voting-launch ev-btn" rel="finalist-1">
+            <a href="#" class="ev-voting-launch ev-btn" rel="finalist-{{s+1}}">
               <span class="text">Select & Save</span>
               <span class="overlay"></span>
             </a>
           </li>
-
-          <li class="ev-user-2 finalist-2">
-            <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
-            <h3>Candidate B</h3>
-            <p>CSI, Gujarat</p>
-            <a href="#" class="ev-voting-launch ev-btn" rel="finalist-2">
-              <span class="text">Select & Save</span>
-              <span class="overlay"></span>
-            </a>
-          </li>
-          <li class="ev-user-3 finalist-3">
-            <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
-            <h3>Candidate C</h3>
-            <p>CSI, MP</p>
-            <a href="#" class="ev-voting-launch ev-btn" rel="finalist-3">
-              <span class="text">Select & Save</span>
-              <span class="overlay"></span>
-            </a>
-          </li>
-          <li class="ev-user-4 finalist-4">
-            <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
-            <h3>Candidate D</h3>
-            <p>CSI, Mumbai</p>
-            <a href="#" class="ev-voting-launch ev-btn" rel="finalist-4">
-              <span class="text">Select & Save</span>
-              <span class="overlay"></span>
-            </a>
-          </li>
+            {% end %}
         </ul>
 
         <ul class="ev-content">
-          <li class="ev-content-1 finalist-1">
+          {% for n in range(1,len(candidatesList[i])+1) %}
+          <li class="ev-content-{{n}} finalist-{{n}}">
             <div class="ev-content-body">
               <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>            
-              <h3>Candidate A</h3>
+              <h3>{{candidatesList[i][n-1]}}</h3>
               <p>CSI, Punjab</p>
               <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</p>
               <div class="ev-video">
-                <p><a href="#" class="ev-voting-launch ev-btn" rel="finalist-1">Select & Save Candidate A</a></p>
+                <p><a href="#" class="ev-voting-launch ev-btn" rel="finalist-{{n}}">Select & Save Candidate</a></p>
               </div>
             </div>
 
-            <div class="ev-overlay ev-overlay-1">
+            <div class="ev-overlay ev-overlay-{{n}}">
               <div class="ev-overlay-content">
                 <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
-                <h3>Select <span>Candidate A</span></h3>
-                <a href="#" class="ev-vote ev-vote-finalist-1 ev-btn" rel="75485">Yes!</a> <a href="#" class="ev-vote-cancel ev-btn">Cancel</a>
+                <h3>Select <span>Candidate</span></h3>
+                <a href="#" class="ev-vote ev-vote-finalist-{{n}} ev-btn">Yes!</a> <a href="#" class="ev-vote-cancel ev-btn">Cancel</a>
               </div>
             </div>
           </li>
-
-          <li class="ev-content-2 finalist-2">
-            <div class="ev-content-body">
-              <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
-              <h3>Candidate B</h3>
-              <p>CSI, Gujarat</p>
-              <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</p>
-              <div class="ev-video">
-                <p><a href="#" class="ev-voting-launch ev-btn" rel="finalist-2">Select & Save Candidate B</a></p>
-              </div>
-            </div>
-
-            <div class="ev-overlay ev-overlay-2">
-              <div class="ev-overlay-content">
-                <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
-                <h3>Select <span>Candidate B</span></h3>
-                <a href="#" class="ev-vote ev-vote-finalist2 ev-btn" rel="75487">Yes!</a> <a href="#" class="ev-vote-cancel ev-btn">Cancel</a>
-              </div>
-            </div>
-          </li>
-
-          <li class="ev-content-3 finalist-3">
-            <div class="ev-content-body">
-              <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>     
-              <h3>Candidate C</h3>
-              <p>CSI, MP</p>
-              <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</p>
-              <div class="ev-video">
-                <p><a href="#" class="ev-voting-launch ev-btn" rel="finalist-3">Select & Save Candidate C</a></p>
-              </div>
-            </div>
-
-            <div class="ev-overlay ev-overlay-3">
-              <div class="ev-overlay-content">
-                <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
-                <h3>Select <span>Candidate C</span></h3>
-                <a href="#" class="ev-vote ev-vote-finalist-3 ev-btn" rel="75486">Yes!</a> <a href="#" class="ev-vote-cancel ev-btn">Cancel</a>
-              </div>
-            </div>
-          </li>
-
-          <li class="ev-content-4 finalist-4">
-            <div class="ev-content-body">
-              <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
-              <h3>Candidate D</h3>
-              <p>CSI, Mumbai</p>
-              <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</p>
-              <div class="ev-video">
-                <p><a href="#" class="ev-voting-launch ev-btn" rel="finalist-4">Select & Save Candidate D</a></p>
-              </div>
-            </div>
-
-            <div class="ev-overlay ev-overlay-4">
-              <div class="ev-overlay-content">
-                <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
-                <h3>Select <span>Candidate D</span></h3>
-                <a href="#" class="ev-vote ev-vote-finalist-4 ev-btn" rel="75490">Yes!</a> <a href="#" class="ev-vote-cancel ev-btn">Cancel</a>
-              </div>
-            </div>
-          </li>          
+          {% end %}
         </ul>
+      
       </div>
-    {%end%}
+      
+    {% end %}
     
     <!--REVIEW SECTION-->
-    <div class="ev-wrapper" id="ev-wrapper4" style="background-color:#F5F5F5; margin-left:40px;">
+    <div class="ev-wrapper" id="ev-wrapper{{len(positions)+1}}" style="background-color:#F5F5F5; margin-left:40px;">
         <div class="ev-header">
           <small>February 21, 2015 &mdash; February 25, 2015</small>
           <h2 class="ev-headline">Review your candidate selections</h2>

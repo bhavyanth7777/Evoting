@@ -98,7 +98,13 @@ class LoginHandler(tornado.web.RequestHandler):
             ipDocument = {'Username':username, 'IP':ip, 'Time':repr(datetime.datetime.now())}
             db.ips.insert(ipDocument)
             #----------------------------------
-            self.render('index2.html',positions=positions,ip=ip)
+            candidatesList = []
+            for i in positions:
+                print [x['Name'] for x in db.candidates.find({'Position':i})]
+                candidatesList.append([x['Name'] for x in db.candidates.find({'Position':i})])
+
+
+            self.render('index2.html',positions=positions,ip=ip,candidatesList=candidatesList)
         else:
             self.redirect('/')
 
