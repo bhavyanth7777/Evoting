@@ -24,7 +24,8 @@
 <body>
      
   <script type="text/javascript">
-    // We add +2 because review section also comes after all positions. 
+  var ws = new WebSocket("ws://localhost:8888/ws");
+  // We add +2 because review section also comes after all positions. 
   $(document).ready(function()
   {
       {% for i in range(2,len(positions)+2) %}
@@ -41,7 +42,51 @@
             }
           );
       {%end%}
-});
+  });
+  //  Onclick Voting using sockets. 
+  function vote(n,p,pname)
+  {
+    var id = n;
+    var position = p;
+    var nameOfCandidate = pname;
+    var messageToServer = {messageType:"voted", messageData:'', 'id':id, 'position':position, 'candidateName':pname};
+    messageToServer = JSON.stringify(messageToServer);
+    ws.send(messageToServer);
+  };
+  function getSelectedCandidates()
+  {
+    alert('lol');
+    var messageToServer = {messageType:"getSelectedCandidates", messageData:''}
+    messageToServer = JSON.stringify(messageToServer)
+    ws.send(messageToServer)
+  }
+  ws.onopen = function(evt)
+  {
+      //alert("socket opened client side");
+
+  }
+  ws.onclose = function(evt)
+  {
+      //alert("socket closed client side");
+  }
+  ws.onmessage = function(evt) 
+  {
+      //alert("Received message");
+      messageFromServer = evt.data;
+      messageFromServer = JSON.parse(messageFromServer);
+      messageType = messageFromServer.messageType;
+      if (messageType=="votedVerificaiton")
+      {
+          message = messageFromServer.message;
+          alert(message);
+      }
+      else if (messageType = "selectedCandidate")
+      {
+          alert ('received');
+          candidates = JSON.stringify(messageFromServer.message);
+          alert(candidates);
+      }
+  }
   </script>
       
 <!--   Overlay for fixed sidebar -->
@@ -87,7 +132,7 @@
         
         <li class="divider"></li>
         <li>
-            <a href="#" id="link_{{len(positions)+1}}">
+            <a href="#" id="link_{{len(positions)+1}}" onclick="getSelectedCandidates()">
                 <!--i class="sidebar-icon md-drafts"></i-->
                 Review Candidates & Submit
             </a>
@@ -151,8 +196,8 @@
               <div class="ev-overlay ev-overlay-{{n}}">
                 <div class="ev-overlay-content">
                   <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
-                  <h3>Select <span>Candidate</span></h3>
-                  <a href="#" class="ev-vote ev-vote-finalist-{{n}} ev-btn">Yes!</a> <a href="#" class="ev-vote-cancel ev-btn">Cancel</a>
+                  <h3>Select <span>{{candidatesList[i][n-1]}}</span></h3>
+                  <a href="#" onclick="vote({{ idList[i][n-1] }},'{{ positions[i]}}','{{candidatesList[i][n-1] }}');" class="ev-vote ev-vote-finalist-{{n}} ev-btn">Yes!</a> <a href="#" class="ev-vote-cancel ev-btn">Cancel</a>
                 </div>
               </div>
             </li>
@@ -167,6 +212,7 @@
           <small>February 21, 2015 &mdash; February 25, 2015</small>
           <h2 class="ev-headline">Review your candidate selections</h2>
         </div>
+        
         <ul class="ev-user" style="color:green">
           <li class="ev-user-1 finalist-1">
             <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
