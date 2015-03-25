@@ -43,7 +43,107 @@
           );
       {%end%}
   });
+  
+
   //  Onclick Voting using sockets. 
+  function createDomStructureForReview(candidates)
+  {
+    domObject = document.getElementById('reviewDOM');
+    while (domObject.firstChild) {
+        domObject.removeChild(domObject.firstChild);
+    }
+    candidates = JSON.parse(candidates);
+    var count = 0;
+    for (var position in candidates)
+    {
+      if (position != "BallotId" && position != "Submitted")
+      {
+        count++;
+        domObject = document.getElementById('reviewDOM');
+        // List element created.
+        listObject = document.createElement("li");
+        listObject.className = "ev-user-" + toString(count) + " finalist-" + toString(count);
+        // Span Element Created.
+        spanObject = document.createElement("span");
+        spanObject.className = "ev-headshot";
+        // Image element created that is to be inserted inside span.
+        imageObjectInsideSpan = document.createElement("img");
+        imageObjectInsideSpan.src = "http://thevillaatnorthend.co.uk/img/image-waiting.png";
+        imageObjectInsideSpan.width = "160";
+        imageObjectInsideSpan.height = "160";
+        // Appending Image to Span.
+        spanObject.appendChild(imageObjectInsideSpan);
+        // Appending span to list
+        listObject.appendChild(spanObject);
+        // Header element created.
+        candidateName = document.createElement("h3");
+        textNode = document.createTextNode(candidates[position][1]);
+        candidateName.appendChild(textNode);
+        listObject.appendChild(candidateName);
+        // Creating Paragraph Tag
+        paraTag = document.createElement("p");
+        paraTextNode = document.createTextNode("CSI,Punjab");
+        paraTag.appendChild(paraTextNode);
+        listObject.appendChild(paraTag);
+        //Creating Next Paragraph tag
+        secondParaTag = document.createElement("p");
+        secondParaTag.className = "ev-voting-launch ev-btn-edit";
+        secondParaTag.rel = "finalist-" + toString(count);
+        // Create the span that has to be appended to secondParaTag
+        spanObjectInSecondParaTag = document.createElement("span");
+        spanObjectInSecondParaTag.className = "text";
+        spanObjectInSecondParaTagTextNode = document.createTextNode("For "+ position);
+        spanObjectInSecondParaTag.appendChild(spanObjectInSecondParaTagTextNode);
+        secondParaTag.appendChild(spanObjectInSecondParaTag);
+        listObject.appendChild(secondParaTag);
+        //Creating thirdParaTag. This is getting boring.
+        thirdParaTag = document.createElement("p");
+        thirdParaTagTextNode = document.createTextNode("Click the button above to edit your choice.");
+        thirdParaTag.appendChild(thirdParaTagTextNode);
+        listObject.appendChild(thirdParaTag);
+        //Creating the DIVs!!! 
+        divTag = document.createElement("div");
+        divTag.className = "ev-overlay ev-overlay-2";
+        secondDivTag = document.createElement("div");
+        secondDivTag.className =  "ev-overlay-content";
+        // Creating the edit elements insdie second DIV tag
+        editCandidate = document.createElement("h3");
+        editCandidateTextNode = document.createTextNode("Edit " + position + " ?");
+        editCandidate.appendChild(editCandidateTextNode);
+        secondDivTag.appendChild(editCandidate);
+        // anchor tag to click edit;
+        anchorTagForEdit = document.createElement("a");
+        anchorTagForEdit.href = "#";
+        anchorTagForEdit.className = "ev-vote ev-vote-finalist2 ev-btn";
+        anchorTagForEdit.style.marginTop = "50px";
+        anchorTagForEditTextNode = document.createTextNode("Edit");
+        anchorTagForEdit.appendChild(anchorTagForEditTextNode);
+        secondDivTag.appendChild(anchorTagForEdit);
+        // Anchor tag for cancel
+        anchorTagForCancel = document.createElement("a");
+        anchorTagForCancel.href = "#";
+        anchorTagForCancel.className = "ev-vote-cancel ev-btn";
+        anchorTagForCancelTextNode = document.createTextNode("Cancel");
+        anchorTagForCancel.appendChild(anchorTagForCancelTextNode);
+        secondDivTag.appendChild(anchorTagForCancel);
+        divTag.appendChild(secondDivTag);
+        listObject.appendChild(divTag);
+        domObject.appendChild(listObject);
+      }
+    }    
+    
+
+  }
+  function submitForm()
+  {
+      document.getElementById('form').submit();
+  }
+  function submitted(){
+    var messageToServer = {messageType:"submitted", messageData:''};
+    messageToServer = JSON.stringify(messageToServer);
+    ws.send(messageToServer);
+
+  }
   function vote(n,p,pname)
   {
     var id = n;
@@ -55,7 +155,6 @@
   };
   function getSelectedCandidates()
   {
-    alert('lol');
     var messageToServer = {messageType:"getSelectedCandidates", messageData:''}
     messageToServer = JSON.stringify(messageToServer)
     ws.send(messageToServer)
@@ -80,11 +179,15 @@
           message = messageFromServer.message;
           alert(message);
       }
-      else if (messageType = "selectedCandidate")
+      else if (messageType == "selectedCandidate")
       {
-          alert ('received');
           candidates = JSON.stringify(messageFromServer.message);
-          alert(candidates);
+          createDomStructureForReview(candidates);
+          //alert(candidates);
+      }
+      else if (messageType == "SubmittedResponse")
+      {
+        submitForm();
       }
   }
   </script>
@@ -197,7 +300,7 @@
                 <div class="ev-overlay-content">
                   <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
                   <h3>Select <span>{{candidatesList[i][n-1]}}</span></h3>
-                  <a href="#" onclick="vote({{ idList[i][n-1] }},'{{ positions[i]}}','{{candidatesList[i][n-1] }}');" class="ev-vote ev-vote-finalist-{{n}} ev-btn">Yes!</a> <a href="#" class="ev-vote-cancel ev-btn">Cancel</a>
+                  <a id="change{{i+1}}" href="#" onclick="vote({{ idList[i][n-1] }},'{{ positions[i]}}','{{candidatesList[i][n-1] }}'); $('#ev-wrapper{{i}}').hide(); $('#ev-wrapper{{i+1}}').show();" class="ev-vote ev-vote-finalist-{{n}} ev-btn">Yes!</a> <a href="#" class="ev-vote-cancel ev-btn">Cancel</a>
                 </div>
               </div>
             </li>
@@ -207,99 +310,29 @@
     {% end %}
     
     <!--REVIEW SECTION-->
+    
     <div class="ev-wrapper" id="ev-wrapper{{len(positions)+1}}" style="background-color:#F5F5F5; margin-left:40px;">
         <div class="ev-header">
           <small>February 21, 2015 &mdash; February 25, 2015</small>
           <h2 class="ev-headline">Review your candidate selections</h2>
         </div>
         
-        <ul class="ev-user" style="color:green">
-          <li class="ev-user-1 finalist-1">
-            <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
-            <h3>Candidate A</h3>
-            <p>CSI, Punjab</p>
-            <p class="ev-voting-launch ev-btn-edit" rel="finalist-1">
-              <span class="text">For President</span>
-                
-            </p>
-              <p>Click the button above to edit your choice.</p>
-              
-              <div class="ev-overlay ev-overlay-2">
-              <div class="ev-overlay-content">
-                
-                <h3>Edit President Elect?</h3>
-                <a href="#" class="ev-vote ev-vote-finalist2 ev-btn" rel="75487" style="margin-top:50px">Edit</a> <a href="#" class="ev-vote-cancel ev-btn">Cancel</a>
-              </div>
-            </div>
-          </li>
-            
+        <ul id="reviewDOM" class="ev-user" style="color:green">
 
-          <li class="ev-user-2 finalist-2">
-            <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
-            <h3>Candidate B</h3>
-            <p>CSI, Gujarat</p>
-            <p class="ev-voting-launch ev-btn-edit" rel="finalist-2">
-              <span class="text">For Vice President</span>
-            </p>
-               <p>Click the button above to edit your choice.</p>
-              
-              
-            <div class="ev-overlay ev-overlay-2">
-              <div class="ev-overlay-content">
-                
-                <h3>Edit Vice President Elect?</h3>
-                <a href="#" class="ev-vote ev-vote-finalist2 ev-btn" rel="75487" style="margin-top:50px">Edit</a> <a href="#" class="ev-vote-cancel ev-btn">Cancel</a>
-              </div>
-            </div>
-          </li>
-          <li class="ev-user-3 finalist-3">
-            <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
-            <h3>Candidate C</h3>
-            <p>CSI, MP</p>
-            <p class="ev-voting-launch ev-btn-edit" rel="finalist-3">
-              <span class="text">For Technical Director</span>
-            </p>
-               <p>Click the button above to edit your choice.</p>
-              
-              <div class="ev-overlay ev-overlay-3">
-              <div class="ev-overlay-content">
-                
-                <h3>Edit Technical Director Elect?</span></h3>
-                <a href="#" class="ev-vote ev-vote-finalist-3 ev-btn" rel="75486" style="margin-top:50px">Edit</a> <a href="#" class="ev-vote-cancel ev-btn">Cancel</a>
-              </div>
-            </div>
-          </li>
-          <li class="ev-user-4 finalist-4">
-            <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
-            <h3>Candidate D</h3>
-            <p>CSI, Mumbai</p>
-            <p class="ev-voting-launch ev-btn-edit" rel="finalist-4">
-              <span class="text">For Assistant Director</span>
-            </p>
-               <p>Click the button above to edit your choice.</p>
-            <div class="ev-overlay ev-overlay-4">
-              <div class="ev-overlay-content">
-                
-                <h3>Edit Assistant Director Elect?</span></h3>
-                <a href="#" class="ev-vote ev-vote-finalist-4 ev-btn" rel="75490" style="margin-top:50px">Edit</a> <a href="#" class="ev-vote-cancel ev-btn">Cancel</a>
-              </div>
-            </div>
-          </li>
         </ul>
 
     <ul class="ev-content-edit">
           
-        <form>
-            
-            <input type="checkbox" name="submit"> I have reviewed my selections.<br><br>
-        
-        One Type Password (OTP): <input type="text" name="otp" placeholder="Enter your OTP Here"><br><br>
-        <div class="ev-video">
-                <p><a href="#" class="ev-btn" rel="finalist-2">Submit</a></p>
+        <form name='form' id='form' method='post' action='/thankyou'>
+            <input type="checkbox" name="reviewed"> I have reviewed my selections.<br><br>
+            One Type Password (OTP): <input type="text" name="otp" placeholder="Enter your OTP Here"><br><br>
+            <div class="ev-video">
+                <p>
+                  <a href="#" class="ev-btn" rel="finalist-2" onclick='submitted();'>Submit</a>
+                </p>
             </div>
-                
         </form>
-        </ul>
+    </ul>
         
     </div>
         
@@ -329,6 +362,7 @@
         $('#content').css('font-size', curSize);
         }); 
 	});
+  
 </script>
 
 

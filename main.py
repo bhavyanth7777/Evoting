@@ -101,6 +101,7 @@ class LoginHandler(tornado.web.RequestHandler):
         if userCollectionFromDb:
             regionId = userCollectionFromDb['Region']
             regionDoc = self.db.regions.find_one({"RegionId":regionId})
+            print regionDoc
             positions = regionDoc['Positions']
 
             #------- IP RETRIEVAL-------------
@@ -137,6 +138,10 @@ class LogoutHandler(tornado.web.RequestHandler):
     def get(self):
         self.clear_cookie("user")
         self.redirect('/')
+
+class ThankyouHandler(tornado.web.RequestHandler):
+    def post(self):
+        self.render('thankyou.html')
 
 class WSHandler(tornado.websocket.WebSocketHandler):
      
@@ -200,9 +205,24 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             messageToClient = json.dumps(dataDict)
             self.write_message(messageToClient)
             print messageToClient
+        elif messageType == 'submitted':
+            print 'Submitted'
+            username = repr(self.get_secure_cookie('user'))
+            username = username.split("'")
+            username = str(username[1])
+            userFromDB = self.db.voters.find_one({'UserName':username})
+            ballotID = userFromDB['EncryptedBallotId']
+            print self.db.ballots.update({"BallotId":ballotID},{"$set":{'Submitted':True}},upsert=True)
+
+
+            dataDict = {'messageType':'SubmittedResponse', 'message':''}
+            messageToClient = json.dumps(dataDict)
+            self.write_message(messageToClient)
+            print messageToClient
 
     def on_close(self):
         print("Socket closed server side")
+
         
 handlers = [
     (r'/',IndexHandler),
@@ -210,6 +230,7 @@ handlers = [
     (r'/check',checkLoginHandler),
     (r'/home',LoginHandler),
     (r'/logout',LogoutHandler),
+    (r'/thankyou',ThankyouHandler),
 ]
 
 #---------------------------------------------------------------------------
