@@ -82,7 +82,7 @@ class checkLoginHandler(tornado.web.RequestHandler):
                     # print ballotID
                     if (self.db.ballots.find_one({"BallotId":ballotID})):
                         ballotFromDB = self.db.ballots.find_one({"BallotId":ballotID})
-                        if (ballotFromDB['Submitted']):
+                        if 'Submitted' in ballotFromDB.keys():
                             ballotFromDBBool = ballotFromDB['Submitted']
                             if ballotFromDBBool is True:
                                 self.redirect("/thankyou")
