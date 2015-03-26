@@ -4,6 +4,7 @@
 <head>
 
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>CSI | eVoting Portal</title>
 
@@ -33,6 +34,7 @@
       {% end %}
 
       {% for i in range(1,len(positions)+2) %}
+          
           $('#link_{{i}}').click(function()
            {
               {% for x in range(1,len(positions)+2) %} 
@@ -41,6 +43,15 @@
               $('#ev-wrapper{{i}}').show();
             }
           );
+        //   $('#change{{i}}').click(function()
+        //   {
+        //     // $('#overlayStuff{{i}}').hide();
+        //     {% for x in range(1,len(positions)+2) %} 
+        //           $('#ev-wrapper{{x}}').hide();
+        //     {%end%}
+        //   $('#ev-wrapper{{i+1}}').show();
+        //   }
+        // );
       {%end%}
   });
   
@@ -92,7 +103,7 @@
         // Create the span that has to be appended to secondParaTag
         spanObjectInSecondParaTag = document.createElement("span");
         spanObjectInSecondParaTag.className = "text";
-        spanObjectInSecondParaTagTextNode = document.createTextNode("For "+ position);
+        spanObjectInSecondParaTagTextNode = document.createTextNode(position);
         spanObjectInSecondParaTag.appendChild(spanObjectInSecondParaTagTextNode);
         secondParaTag.appendChild(spanObjectInSecondParaTag);
         listObject.appendChild(secondParaTag);
@@ -139,10 +150,25 @@
       document.getElementById('form').submit();
   }
   function submitted(){
-    var messageToServer = {messageType:"submitted", messageData:''};
-    messageToServer = JSON.stringify(messageToServer);
-    ws.send(messageToServer);
-
+    var checkBox = document.getElementById('reviewed');
+    var otp = document.getElementById('otp');
+    if (checkBox.checked)
+    { 
+      if (otp.value == '123')
+      {
+        var messageToServer = {messageType:"submitted", messageData:''};
+        messageToServer = JSON.stringify(messageToServer);
+        ws.send(messageToServer);
+      }
+      else
+      {
+        alert ("The OTP did not match. We have sent a different OTP. Please enter the new OTP!");
+      }
+    }
+    else
+    {
+      alert("You have not clicked on the checkbox. Kindly check it before submitting.");
+    }
   }
   function vote(n,p,pname)
   {
@@ -195,6 +221,12 @@
 <!--   Overlay for fixed sidebar -->
 <div class="sidebar-overlay"></div>
 
+<div class="sidebar-header header-cover">
+  <a class="sidebar-toggle">
+    <img src="static/img/menu.svg">
+  </a>
+</div>
+
 <!-- Material sidebar -->
 <aside id="sidebar" class="sidebar sidebar-default open" role="navigation">
    
@@ -228,7 +260,8 @@
         <li>
             <a href="#" id="link_{{i+1}}">
                 <!--i class="sidebar-icon md-inbox"></i-->
-                 {{positions[i]}}
+                 <span id="candidateName{{i+1}}"> {{positions[i]}} </span> 
+                 <span id="p-tick{{i+1}}" class="tickMark"></span>
             </a>
         </li>
         {% end %}
@@ -296,11 +329,11 @@
                   <p><a href="#" class="ev-voting-launch ev-btn" rel="finalist-{{n}}">Select & Save Candidate</a></p>
                 </div>
               </div>
-              <div class="ev-overlay ev-overlay-{{n}}">
+              <div id= "overlayStuff{{n}}"class="ev-overlay ev-overlay-{{n}}">
                 <div class="ev-overlay-content">
                   <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
                   <h3>Select <span>{{candidatesList[i][n-1]}}</span></h3>
-                  <a id="change{{i+1}}" href="#" onclick="vote({{ idList[i][n-1] }},'{{ positions[i]}}','{{candidatesList[i][n-1] }}'); $('#ev-wrapper{{i}}').hide(); $('#ev-wrapper{{i+1}}').show();" class="ev-vote ev-vote-finalist-{{n}} ev-btn">Yes!</a> <a href="#" class="ev-vote-cancel ev-btn">Cancel</a>
+                  <a id="change{{i+1}}" href"#" onclick="vote({{ idList[i][n-1] }},'{{ positions[i]}}','{{candidatesList[i][n-1] }}');$('#link_{{i+2}}').click(); setTickMark({{ i+1 }});" class="ev-vote-yes ev-btn">Yes!</a> <a href="#" class="ev-vote-cancel ev-btn">Cancel</a>
                 </div>
               </div>
             </li>
@@ -308,7 +341,7 @@
         </ul>
       </div>
     {% end %}
-    
+  
     <!--REVIEW SECTION-->
     
     <div class="ev-wrapper" id="ev-wrapper{{len(positions)+1}}" style="background-color:#F5F5F5; margin-left:40px;">
@@ -324,8 +357,8 @@
     <ul class="ev-content-edit">
           
         <form name='form' id='form' method='post' action='/thankyou'>
-            <input type="checkbox" name="reviewed"> I have reviewed my selections.<br><br>
-            One Type Password (OTP): <input type="text" name="otp" placeholder="Enter your OTP Here"><br><br>
+            <input type="checkbox" id="reviewed" name="reviewed" required> I have reviewed my selections.<br><br>
+            One Type Password (OTP): <input type="text" name="otp" id= "otp" placeholder="Enter your OTP as 123" required><br><br>
             <div class="ev-video">
                 <p>
                   <a href="#" class="ev-btn" rel="finalist-2" onclick='submitted();'>Submit</a>
@@ -343,14 +376,40 @@
 
     </div>
 
+    <script type="text/javascript">
+      for (var i=0; i< {{ len(positions) }}; i++)
+      {
+        var tempVar = "candidateName" + (i+1);
+        var obj = document.getElementById(tempVar);
+        var name = obj.innerHTML;
+        var tick  = document.getElementById('p-tick'+(i+1));
+        
+        {% for x in voted %}
+            var anotherTempVar = "{{ x }}"
+            anotherTempVar = anotherTempVar.trim();
+            name = name.trim();
+            if(name == anotherTempVar)
+            {
+                tick.innerHTML = "&#10003"; 
+            }
+        {% end %} 
+      }
+    </script>
+
 </div>
 
   <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js'></script>
 
-  <script src="js/index.js"></script>
+  <script src="static/js/index.js"></script>
     
 <script type="text/javascript">
-	 $(document).ready(function() { 
+
+  function setTickMark(i)
+  {
+      var tick  = document.getElementById('p-tick'+(i));
+      tick.innerHTML = "&#10003";
+  }
+   $(document).ready(function() { 
 		$('#incfont').click(function(){	   
         curSize= parseInt($('#content').css('font-size')) + 2;
 		if(curSize<=20)
@@ -361,8 +420,7 @@
 		if(curSize>=12)
         $('#content').css('font-size', curSize);
         }); 
-	});
-  
+	}); 
 </script>
 
 

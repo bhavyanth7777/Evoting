@@ -50,6 +50,7 @@ class checkLoginHandler(tornado.web.RequestHandler):
             self.clear_cookie('user')
             self.clear_cookie('bkey')
             self.redirect('/')
+    
     def post(self):
         if self.get_secure_cookie('user'):
             self.redirect("/home")
@@ -76,13 +77,28 @@ class checkLoginHandler(tornado.web.RequestHandler):
 
                 if encryptedPassword == userCollectionFromDb['Password']:
 
-                    print(userCollectionFromDb['Name'])
-                    # setting cookies when user logs in
-                    self.set_secure_cookie("user", username)
-                    self.set_secure_cookie("bkey",bkey)
-                    self.redirect('/home')
+                    # print(userCollectionFromDb['Name']) 
+                    ballotID = userCollectionFromDb['EncryptedBallotId']
+                    # print ballotID
+                    if (self.db.ballots.find_one({"BallotId":ballotID})):
+                        ballotFromDB = self.db.ballots.find_one({"BallotId":ballotID})
+                        if (ballotFromDB['Submitted']):
+                            ballotFromDBBool = ballotFromDB['Submitted']
+                            if ballotFromDBBool is True:
+                                self.redirect("/thankyou")
+                            else:
+                                self.set_secure_cookie('user',username)
+                                self.set_secure_cookie('bkey',bkey) 
+                                self.redirect("/home")
+                        else:
+                            self.set_secure_cookie('user',username)
+                            self.set_secure_cookie('bkey',bkey)
+                            self.redirect("/home")
+                    else:
+                        self.set_secure_cookie('user',username)
+                        self.set_secure_cookie('bkey',bkey)
+                        self.redirect('/home')
                 else:
-
                     self.redirect('/')
             else:
                 self.redirect('/')
@@ -93,15 +109,20 @@ class LoginHandler(tornado.web.RequestHandler):
     def get(self):
         self.db = db
         username = repr(self.get_secure_cookie('user'))
+        # print type(username)
+        if username == "None":
+            # print "LOLOLOLOLOOOLOOOL"
+            self.redirect("/")
         username = username.split("'")
         username = str(username[1])
         bkey = self.get_secure_cookie('bkey')
         
         userCollectionFromDb = self.db.voters.find_one({"UserName":username})
+        ballotID = userCollectionFromDb['EncryptedBallotId']
         if userCollectionFromDb:
             regionId = userCollectionFromDb['Region']
             regionDoc = self.db.regions.find_one({"RegionId":regionId})
-            print regionDoc
+            # print regionDoc
             positions = regionDoc['Positions']
 
             #------- IP RETRIEVAL-------------
@@ -119,13 +140,17 @@ class LoginHandler(tornado.web.RequestHandler):
             description = []
             idList = []
             for i in positions:
-                print [x['Name'] for x in db.candidates.find({'Position':i})]
+                # print [x['Name'] for x in db.candidates.find({'Position':i})]
                 candidatesList.append([x['Name'] for x in db.candidates.find({'Position':i})])
                 description.append([x['Description'] for x in db.candidates.find({'Position':i})])
                 idList.append([x['ID'] for x in db.candidates.find({'Position':i})])
-
-
-            self.render('index2.html',positions=positions,ip=ip,candidatesList=candidatesList, description=description,idList=idList)
+            voted = self.db.ballots.find_one({'BallotId':ballotID})
+            if (voted):
+                voted.pop('_id')
+                voted.pop('BallotId')
+            else:
+                voted = []
+            self.render('index2.html',positions=positions,ip=ip,candidatesList=candidatesList, description=description,idList=idList,voted=voted)
         else:
             self.redirect('/')
 
@@ -140,13 +165,20 @@ class LogoutHandler(tornado.web.RequestHandler):
         self.redirect('/')
 
 class ThankyouHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.clear_cookie('user')
+        self.clear_cookie('bkey')
+        self.render('thankyou.html')
     def post(self):
+        self.clear_cookie('user')
+        self.clear_cookie('bkey')
         self.render('thankyou.html')
 
 class WSHandler(tornado.websocket.WebSocketHandler):
      
     def open(self):
-        print("socket opened server side")
+        pass
+        # print("socket opened server side")
             
     def on_message(self, message):
         self.db = db
@@ -163,7 +195,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             if userCollectionFromDb:
                 if encryptedPassword == userCollectionFromDb['Password']:
                     dataDict = {'messageType':'serverVerifiedLoginDetails','verificationStatus':'True', 'message':''}
-                    print "Verified"
+                    # print "Verified"
                 else:
                     dataDict = {'messageType':'serverVerifiedLoginDetails','verificationStatus':'False', 'message':'Wrong Password!'}
             else:
@@ -171,7 +203,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             messageToClient = json.dumps(dataDict)
             self.write_message(messageToClient)            
         elif messageType == "voted":
-            print 'Enter voted'
+            # print 'Enter voted'
             selectedCandidateID = messageFromClient['id']
             selectedCandidateName = messageFromClient['candidateName']
             username = repr(self.get_secure_cookie('user'))
@@ -182,17 +214,18 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             ballotID = userFromDB['EncryptedBallotId']
             ballotFromDB = self.db.ballots.find_one({'BallotId':ballotID})
             if ballotFromDB:
-                print 'Ballot From DB'
-                print self.db.ballots.update({'BallotId':ballotID}, {"$set": {position:[selectedCandidateID,selectedCandidateName]}},upsert=True)
+
+                # print 'Ballot From DB'
+                self.db.ballots.update({'BallotId':ballotID}, {"$set": {position:[selectedCandidateID,selectedCandidateName]}},upsert=True)
             else:
-                print 'Inserted'
-                print self.db.ballots.insert({'BallotId':ballotID, position:[selectedCandidateID,selectedCandidateName]})
+                # print 'Inserted'
+                self.db.ballots.insert({'BallotId':ballotID, position:[selectedCandidateID,selectedCandidateName]})
             dataDict = {'messageType':'votedVerificaiton', 'message':'Successfully saved your selection!'}
             messageToClient = json.dumps(dataDict)
             self.write_message(messageToClient)
-            print messageToClient
+            # print messageToClient
         elif messageType == "getSelectedCandidates":
-            print 'received'
+            # print 'received'
             username = repr(self.get_secure_cookie('user'))
             username = username.split("'")
             username = str(username[1])
@@ -204,24 +237,25 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             dataDict = {'messageType':'selectedCandidate', 'message':ballotFromDB}
             messageToClient = json.dumps(dataDict)
             self.write_message(messageToClient)
-            print messageToClient
+            # print messageToClient
         elif messageType == 'submitted':
-            print 'Submitted'
+            # print 'Submitted'
             username = repr(self.get_secure_cookie('user'))
             username = username.split("'")
             username = str(username[1])
             userFromDB = self.db.voters.find_one({'UserName':username})
             ballotID = userFromDB['EncryptedBallotId']
-            print self.db.ballots.update({"BallotId":ballotID},{"$set":{'Submitted':True}},upsert=True)
+            self.db.ballots.update({"BallotId":ballotID},{"$set":{'Submitted':True}},upsert=True)
 
 
             dataDict = {'messageType':'SubmittedResponse', 'message':''}
             messageToClient = json.dumps(dataDict)
             self.write_message(messageToClient)
-            print messageToClient
+            # print messageToClient
 
     def on_close(self):
-        print("Socket closed server side")
+        pass
+        # print("Socket closed server side")
 
         
 handlers = [

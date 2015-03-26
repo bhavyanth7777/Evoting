@@ -70,10 +70,15 @@ function closeOverlay() {
     $(this).removeClass('open').fadeOut();
     $('body').removeClass('ev-overlay-open');
   });
+  
   $('.ev-overlay-content').on('click', function(event) {
     event.stopPropagation();
   });
   $('.ev-vote-cancel').on('click', function() {
+    $('.ev-overlay').removeClass('open').fadeOut();
+    $('body').removeClass('ev-overlay-open');
+  });
+  $('.ev-vote-yes').on('click', function() {
     $('.ev-overlay').removeClass('open').fadeOut();
     $('body').removeClass('ev-overlay-open');
   });

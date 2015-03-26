@@ -30,7 +30,7 @@ $(document).ready(function() {
     var toggleButtons = $('.sidebar-toggle');
 
     // Hide toggle buttons on default position
-    toggleButtons.css('display', 'none');
+    toggleButtons.css('display', 'block');
     $('body').css('display', 'table');
 
 
@@ -47,7 +47,7 @@ $(document).ready(function() {
             $('body').css('display', 'initial');
         } else {
             // Hide toggle buttons
-            toggleButtons.css('display', 'none');
+            toggleButtons.css('display', 'block');
             $('body').css('display', 'table');
         }
     });
