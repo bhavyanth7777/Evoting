@@ -79,7 +79,7 @@
         spanObject.className = "ev-headshot";
         // Image element created that is to be inserted inside span.
         imageObjectInsideSpan = document.createElement("img");
-        imageObjectInsideSpan.src = "http://thevillaatnorthend.co.uk/img/image-waiting.png";
+        imageObjectInsideSpan.src = "/static/img/" + candidates[position][0]+".png";
         imageObjectInsideSpan.width = "160";
         imageObjectInsideSpan.height = "160";
         // Appending Image to Span.
@@ -93,7 +93,7 @@
         listObject.appendChild(candidateName);
         // Creating Paragraph Tag
         paraTag = document.createElement("p");
-        paraTextNode = document.createTextNode("CSI,Punjab");
+        paraTextNode = document.createTextNode("CSI");
         paraTag.appendChild(paraTextNode);
         listObject.appendChild(paraTag);
         //Creating Next Paragraph tag
@@ -297,7 +297,7 @@
     {% for i in range(len(candidatesList)) %}
       <div class="ev-wrapper" id="ev-wrapper{{i+1}}">
         <div class="ev-header">
-          <small>February 21, 2015 &mdash; February 25, 2015</small>
+          <small>March 28, 2015 &mdash; March 30, 2015</small>
           <h2 class="ev-headline">{{positions[i]}} Nominations</h2>
         </div>
       
@@ -305,10 +305,10 @@
             <!-- For all the different candidates in each position -->
             {% for s in range(len(candidatesList[i])) %}
               <li class="ev-user-{{s+1}} finalist-{{s+1}}">
-                <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
+                <span class="ev-headshot"><img src="static/img/{{idList[i][s]}}.png" width="160" height="160" /></span>
               
                 <h3>{{candidatesList[i][s]}}</h3>
-                <p>CSI, Punjab</p>
+                <p>CSI</p>
                 <a href="#" class="ev-voting-launch ev-btn" rel="finalist-{{s+1}}">
                   <span class="text">Select & Save</span>
                   <span class="overlay"></span>
@@ -321,9 +321,9 @@
           {% for n in range(1,len(candidatesList[i])+1) %}
             <li class="ev-content-{{n}} finalist-{{n}}">
               <div class="ev-content-body">
-                <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>            
+                <span class="ev-headshot"><img src="static/img/{{ idList[i][n-1]}}.png" width="160" height="160" /></span>            
                 <h3>{{candidatesList[i][n-1]}}</h3>
-                <p>CSI, Punjab</p>
+                <p>CSI</p>
                 <p>{{ description[i][n-1]}}</p>
                 <div class="ev-video">
                   <p><a href="#" class="ev-voting-launch ev-btn" rel="finalist-{{n}}">Select & Save Candidate</a></p>
@@ -331,7 +331,7 @@
               </div>
               <div id= "overlayStuff{{n}}"class="ev-overlay ev-overlay-{{n}}">
                 <div class="ev-overlay-content">
-                  <span class="ev-headshot"><img src="http://thevillaatnorthend.co.uk/img/image-waiting.png" width="160" height="160" /></span>
+                  <span class="ev-headshot"><img src="static/img/{{ idList[i][n-1]}}.png" width="160" height="160" /></span>
                   <h3>Select <span>{{candidatesList[i][n-1]}}</span></h3>
                   <a id="change{{i+1}}" href"#" onclick="vote({{ idList[i][n-1] }},'{{ positions[i]}}','{{candidatesList[i][n-1] }}');$('#link_{{i+2}}').click(); setTickMark({{ i+1 }});" class="ev-vote-yes ev-btn">Yes!</a> <a href="#" class="ev-vote-cancel ev-btn">Cancel</a>
                 </div>
@@ -346,7 +346,7 @@
     
     <div class="ev-wrapper" id="ev-wrapper{{len(positions)+1}}" style="background-color:#F5F5F5; margin-left:40px;">
         <div class="ev-header">
-          <small>February 21, 2015 &mdash; February 25, 2015</small>
+          <small>March 28, 2015 &mdash; March 30, 2015</small>
           <h2 class="ev-headline">Review your candidate selections</h2>
         </div>
         
