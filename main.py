@@ -109,22 +109,24 @@ class LoginHandler(tornado.web.RequestHandler):
     def get(self):
         self.db = db
         username = repr(self.get_secure_cookie('user'))
-        # print type(username)
         if username == "None":
-            # print "LOLOLOLOLOOOLOOOL"
             self.redirect("/")
         username = username.split("'")
         username = str(username[1])
         bkey = self.get_secure_cookie('bkey')
-        
+        #Fetching from database with the username that we got from the cookie. 
         userCollectionFromDb = self.db.voters.find_one({"UserName":username})
         ballotID = userCollectionFromDb['EncryptedBallotId']
         if userCollectionFromDb:
+            #regionID is the region to which the user belongs to.
             regionId = userCollectionFromDb['Region']
-            regionDoc = self.db.regions.find_one({"RegionId":regionId})
-            # print regionDoc
-            positions = regionDoc['Positions']
-
+            positions = []
+            #Region 0 is being considered as national. So either national or personal region.
+            regionDoc = self.db.regions.find({"$or":[{"RegionId":0}, {"RegionId":regionId}]})
+            for region in regionDoc:
+                positions += region['Positions'];
+            #positions = regionDoc['Positions']
+            
             #------- IP RETRIEVAL-------------
             httpHeaders = repr(self.request)
             httpHeaders = httpHeaders.split(', ')
@@ -136,6 +138,7 @@ class LoginHandler(tornado.web.RequestHandler):
             ipDocument = {'Username':username, 'IP':ip, 'Time':repr(datetime.datetime.now())}
             db.ips.insert(ipDocument)
             #----------------------------------
+            
             candidatesList = []
             description = []
             idList = []
