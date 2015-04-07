@@ -209,6 +209,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             # print 'Enter voted'
             selectedCandidateID = messageFromClient['id']
             selectedCandidateName = messageFromClient['candidateName']
+            tickID = messageFromClient['Tick']
             username = repr(self.get_secure_cookie('user'))
             username = username.split("'")
             username = str(username[1])
@@ -223,7 +224,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             else:
                 # print 'Inserted'
                 self.db.ballots.insert({'BallotId':ballotID, position:[selectedCandidateID,selectedCandidateName]})
-            dataDict = {'messageType':'votedVerificaiton', 'message':'Successfully saved your selection!'}
+            dataDict = {'messageType':'votedVerificaiton', 'message':'Successfully saved your selection!','tick':tickID}
             messageToClient = json.dumps(dataDict)
             self.write_message(messageToClient)
             # print messageToClient

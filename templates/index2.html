@@ -170,12 +170,14 @@
       alert("You have not clicked on the checkbox. Kindly check it before submitting.");
     }
   }
-  function vote(n,p,pname)
+  function vote(n,p,pname,ticker)
   {
     var id = n;
     var position = p;
     var nameOfCandidate = pname;
-    var messageToServer = {messageType:"voted", messageData:'', 'id':id, 'position':position, 'candidateName':pname};
+    var tick  = document.getElementById('p-tick'+(ticker));
+    tick.innerHTML = "<img src=\"/static/img/loader.gif\">";
+    var messageToServer = {messageType:"voted", messageData:'', 'id':id, 'position':position, 'candidateName':pname, 'Tick':ticker};
     messageToServer = JSON.stringify(messageToServer);
     ws.send(messageToServer);
   };
@@ -203,7 +205,9 @@
       if (messageType=="votedVerificaiton")
       {
           message = messageFromServer.message;
-          alert(message);
+          tickId = messageFromServer.tick;
+          //alert(message);
+          setTickMark(tickId);
       }
       else if (messageType == "selectedCandidate")
       {
@@ -333,7 +337,7 @@
                 <div class="ev-overlay-content">
                   <span class="ev-headshot"><img src="static/img/{{ idList[i][n-1]}}.png" width="160" height="160" /></span>
                   <h3>Select <span>{{candidatesList[i][n-1]}}</span></h3>
-                  <a id="change{{i+1}}" href"#" onclick="vote({{ idList[i][n-1] }},'{{ positions[i]}}','{{candidatesList[i][n-1] }}');$('#link_{{i+2}}').click(); setTickMark({{ i+1 }});" class="ev-vote-yes ev-btn">Yes!</a> <a href="#" class="ev-vote-cancel ev-btn">Cancel</a>
+                  <a id="change{{i+1}}" href"#" onclick="vote({{ idList[i][n-1] }},'{{ positions[i]}}','{{candidatesList[i][n-1] }}', {{i+1}});$('#link_{{i+2}}').click();" class="ev-vote-yes ev-btn">Yes!</a> <a href="#" class="ev-vote-cancel ev-btn">Cancel</a>
                 </div>
               </div>
             </li>
