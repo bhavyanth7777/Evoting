@@ -96,11 +96,12 @@
     </div>
 
     <script type="text/javascript">
+        var host = "localhost:8888"
+        var ws = new WebSocket("ws://" + host + "/ws");
         function submitForm()
         {
             document.getElementById('form').submit();
         }
-        var ws = new WebSocket("ws://localhost:8888/ws");
         ws.onopen = function(evt)
         {
             //alert("socket opened client side");

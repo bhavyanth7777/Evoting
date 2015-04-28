@@ -109,10 +109,10 @@ class LoginHandler(tornado.web.RequestHandler):
     def get(self):
         self.db = db
         username = repr(self.get_secure_cookie('user'))
-        if username == "None":
-            self.redirect("/")
         username = username.split("'")
         username = str(username[1])
+        if username == "None":
+            self.redirect("/")
         bkey = self.get_secure_cookie('bkey')
         #Fetching from database with the username that we got from the cookie. 
         userCollectionFromDb = self.db.voters.find_one({"UserName":username})
@@ -177,6 +177,72 @@ class ThankyouHandler(tornado.web.RequestHandler):
         self.clear_cookie('bkey')
         self.render('thankyou.html')
 
+#-----------------------ADMIN END---------------------------------------
+class AdminIndexHandler(tornado.web.RequestHandler):
+    def get(self):
+        if (self.get_secure_cookie('admin')):
+            self.redirect('/admincheck')
+        else:
+            self.render('admin/login.html')
+
+class checkAdminLoginHandler(tornado.web.RequestHandler):
+    def get(self):
+        adminName = repr(self.get_secure_cookie('admin'))
+        adminName = adminName.split("'")
+        adminName = str(adminName[1])
+        if (adminName):
+            self.db = db
+            adminCollectionFromDb = self.db.admin.find_one({"UserName":adminName})
+            if adminCollectionFromDb:
+                self.redirect("/adminhome") #--------REDIRECTION URL. TO be changed
+        else:
+            self.clear_cookie('admin')
+            self.redirect('/admin')
+    
+    def post(self):
+        if self.get_secure_cookie('user'):
+            self.redirect("/adminhome")  #----------REDIRECTION URL. To be changed.
+        else:
+            self.db = db
+            adminName = re.escape(self.get_argument("id"))
+            rawPassword = re.escape(self.get_argument("pas"))
+
+            ## Password being encrypted with PKBDF2_SHA256 and a salt here and then being checked. CHANGE SALT FOR ADMIN LOGIN!!!!!!!!!!
+
+            salted = b'=ruQ3.Xc,G/*i|D[+!+$Mo^gn|kM1m|X[QxDOX-=zptIZhzn,};?-(Djsl,&Fg<r'
+            encryptedPassword = pbkdf2_sha256.encrypt(rawPassword, rounds=8000, salt= salted)
+        
+            adminCollectionFromDb = self.db.admin.find_one({"UserName":adminName})
+            if adminCollectionFromDb:
+                if encryptedPassword == adminCollectionFromDb['Password']:
+                    # print(userCollectionFromDb['Name']) 
+                    self.set_secure_cookie('admin',adminName)
+                    self.redirect('/adminhome') #--------------REDIRECTION URL. To be changed.
+                else:
+                    self.redirect('/admin')
+            else:
+                self.redirect('/admin')
+
+class adminLoginHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.db = db
+        adminName = repr(self.get_secure_cookie('admin'))
+        adminName = adminName.split("'")
+        adminName = str(adminName[1])
+        if adminName == "None":
+            self.redirect("/admin")
+        adminCollectionFromDb = self.db.admin.find_one({"UserName":adminName})
+        if adminCollectionFromDb:
+            name = adminCollectionFromDb['Name']
+            self.render('admin/index.html', name=name)
+
+class adminLogoutHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.clear_cookie("admin")
+        self.redirect('/admin')
+
+
+#------------------------WEB SOCKET HANDLER-----------------------------
 class WSHandler(tornado.websocket.WebSocketHandler):
      
     def open(self):
@@ -269,6 +335,10 @@ handlers = [
     (r'/home',LoginHandler),
     (r'/logout',LogoutHandler),
     (r'/thankyou',ThankyouHandler),
+    (r'/admin',AdminIndexHandler),
+    (r'/admincheck',checkAdminLoginHandler),
+    (r'/adminhome',adminLoginHandler),
+    (r'/adminlogout',adminLogoutHandler),
 ]
 
 #---------------------------------------------------------------------------

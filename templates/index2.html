@@ -25,7 +25,8 @@
 <body>
      
   <script type="text/javascript">
-  var ws = new WebSocket("ws://localhost:8888/ws");
+  var host = "localhost:8888"
+  var ws = new WebSocket("ws://" + host + "/ws");
   // We add +2 because review section also comes after all positions. 
   $(document).ready(function()
   {

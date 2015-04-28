@@ -8,6 +8,7 @@ db.voters.remove()
 db.candidates.remove()
 db.regions.remove()
 db.ballots.remove()
+db.admin.remove()
 
 # Users collection
 name = ['A', 'B', 'C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
@@ -49,5 +50,6 @@ for each in distinctRegion:
 	region = {'RegionId':each, 'Positions':positions}
 	db.regions.insert(region)
 
-#Ballot 
-
+pas = pbkdf2_sha256.encrypt("12345", rounds=8000, salt= salted)
+admin = {"UserName":"abhilash", "Password":pas, "Name" : "Abhilash Panigrahi" }
+db.admin.insert(admin)
